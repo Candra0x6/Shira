@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-04-07T00:34:08.575502",
+  "execution_phase": "Tuned Model Validation",
+  "data_source": "IDX_2023_Real_496",
+  "tuned_configuration": {
+    "guardrails": {
+      "riba_threshold": 0.25,
+      "dhirar_threshold": 4.0
+    },
+    "model": {
+      "max_depth": 7,
+      "learning_rate": 0.08,
+      "class_weight_positive": 1.5,
+      "decision_threshold": 0.45
+    }
+  },
+  "final_metrics": {
+    "f1_score": "0.8853",
+    "precision": "0.7942",
+    "recall": "1.0000",
+    "accuracy": "0.7984",
+    "auc_roc": "0.9300",
+    "guardrail_pass_rate": "0.8387"
+  },
+  "target_comparison": {
+    "f1_score": {
+      "achieved": "0.8853",
+      "target": 0.85,
+      "met": true
+    },
+    "precision": {
+      "achieved": "0.7942",
+      "target": 0.9,
+      "met": false
+    },
+    "recall": {
+      "achieved": "1.0000",
+      "target": 0.85,
+      "met": true
+    },
+    "accuracy": {
+      "achieved": "0.7984",
+      "target": 0.85,
+      "met": false
+    },
+    "auc_roc": {
+      "achieved": "0.9300",
+      "target": 0.92,
+      "met": true
+    },
+    "guardrail_pass_rate": {
+      "achieved": "0.8387",
+      "target": 0.8,
+      "met": true
+    }
+  },
+  "production_ready": false
+}

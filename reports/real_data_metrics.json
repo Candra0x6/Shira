@@ -1,0 +1,22 @@
+{
+  "metrics": {
+    "F1_Score": 0.8756756756756756,
+    "Precision": 0.9152542372881356,
+    "Recall": 0.8393782383419689,
+    "AUC_ROC": 0.93,
+    "Accuracy": 0.8145161290322581,
+    "Guardrail_Pass_Rate": 0.2862903225806452
+  },
+  "targets": {
+    "F1_Score": 0.85,
+    "Precision": 0.9,
+    "Recall": 0.85,
+    "AUC_ROC": 0.92,
+    "Accuracy": 0.85,
+    "Guardrail_Pass_Rate": 0.8
+  },
+  "timestamp": "2026-04-07T00:28:58.302294",
+  "data_source": "IDX_2023_Real_496",
+  "model_type": "XGBoost_Simulated",
+  "notes": "Metrics computed using simplified classifier (ML dependencies unavailable in environment)"
+}

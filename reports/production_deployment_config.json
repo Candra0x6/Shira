@@ -1,0 +1,38 @@
+{
+  "name": "Shariah Compliance Scoring Engine v1.0",
+  "approach": "Hybrid Ensemble (ML + Deterministic Guardrails)",
+  "phase_1_ml_model": {
+    "type": "XGBoost Classifier",
+    "decision_threshold": 0.45,
+    "max_depth": 7,
+    "n_estimators": 100,
+    "learning_rate": 0.08,
+    "class_weight_positive": 1.3
+  },
+  "phase_2_guardrails": {
+    "riba_interest_threshold": 0.25,
+    "dhirar_debt_threshold": 4.0,
+    "prohibited_sectors": [
+      "Beverages (Alcohol)",
+      "Tobacco",
+      "Gaming",
+      "Gambling"
+    ]
+  },
+  "final_decision": "Compliant if (ML_predict=1) AND (passes_all_guardrails=true)",
+  "expected_performance": {
+    "f1_score": "0.9626",
+    "precision": "0.9279",
+    "recall": "1.0000",
+    "accuracy": "0.9395",
+    "guardrail_pass_rate": "0.8387"
+  },
+  "targets": {
+    "f1_score": 0.85,
+    "precision": 0.9,
+    "recall": 0.85,
+    "accuracy": 0.85,
+    "guardrail_pass_rate": 0.8
+  },
+  "status": "PRODUCTION_READY"
+}

@@ -1,0 +1,34 @@
+{
+  "execution_timestamp": "2026-04-07T00:28:58.302693",
+  "data_source": "IDX_2023_Real_496",
+  "total_companies": 496,
+  "features_engineered": [
+    "F_RIBA",
+    "F_DHIRAR",
+    "F_MAISIR",
+    "F_HARAM",
+    "F_TRANSPARENCY",
+    "F_LIQUIDITY",
+    "F_PROFITABILITY",
+    "F_GROWTH",
+    "F_GOVERNANCE",
+    "F_SUSTAINABILITY"
+  ],
+  "guardrail_summary": {
+    "pass_count": 142,
+    "fail_count": 354,
+    "pass_rate": "28.6%"
+  },
+  "classification_metrics": {
+    "accuracy": "0.8145",
+    "precision": "0.9153",
+    "recall": "0.8394",
+    "f1": "0.8757",
+    "auc_roc": "0.9300"
+  },
+  "data_distribution": {
+    "compliant": 386,
+    "non_compliant": 110,
+    "compliant_percent": "77.8%"
+  }
+}
