@@ -1,0 +1,92 @@
+{
+  "classification": {
+    "accuracy": 0.92,
+    "precision": 0.926829268292683,
+    "recall": 0.9743589743589743,
+    "f1": 0.95,
+    "matthews_corr": 0.7565274077488416,
+    "cohens_kappa": 0.7506234413965087,
+    "auc": 0.9283216783216783
+  },
+  "confusion_matrix": {
+    "true_negatives": 16.0,
+    "false_positives": 6.0,
+    "false_negatives": 2.0,
+    "true_positives": 76.0,
+    "specificity": 0.7272727272727273,
+    "sensitivity": 0.9743589743589743,
+    "fpr": 0.2727272727272727,
+    "fnr": 0.02564102564102564
+  },
+  "error_analysis": {
+    "total_errors": 8,
+    "error_rate": 0.08,
+    "false_positives": 6,
+    "false_negative_rate": 0.02,
+    "false_negative_indices": [
+      66,
+      91
+    ],
+    "false_positive_indices": [
+      4,
+      22,
+      48,
+      55,
+      60,
+      65
+    ],
+    "mean_error_confidence": 0.5965273976325989,
+    "min_error_confidence": 0.3031013011932373,
+    "max_error_confidence": 0.7615013718605042
+  },
+  "feature_importance": {
+    "all": {
+      "nonhalal_revenue_percent": 0.32054057717323303,
+      "f_nonhalal": 0.2950664758682251,
+      "sector_encoded": 0.09512278437614441,
+      "total_liabilities": 0.026729566976428032,
+      "operating_cash_flow": 0.02331593632698059,
+      "total_assets": 0.02174024097621441,
+      "f_riba": 0.020549260079860687,
+      "roe": 0.01902962476015091,
+      "cash_flow_to_debt": 0.01886284165084362,
+      "net_revenue": 0.01697758585214615,
+      "debt_to_equity": 0.016955558210611343,
+      "riba_intensity": 0.01695399172604084,
+      "net_income": 0.01691821590065956,
+      "profit_margin": 0.016608279198408127,
+      "total_equity": 0.01585523970425129,
+      "debt_to_assets": 0.0158107690513134,
+      "interest_expense": 0.015354371629655361,
+      "interest_coverage": 0.014895567670464516,
+      "roa": 0.012713054195046425
+    },
+    "top_n": {
+      "nonhalal_revenue_percent": 0.32054057717323303,
+      "f_nonhalal": 0.2950664758682251,
+      "sector_encoded": 0.09512278437614441,
+      "total_liabilities": 0.026729566976428032,
+      "operating_cash_flow": 0.02331593632698059,
+      "total_assets": 0.02174024097621441,
+      "f_riba": 0.020549260079860687,
+      "roe": 0.01902962476015091,
+      "cash_flow_to_debt": 0.01886284165084362,
+      "net_revenue": 0.01697758585214615,
+      "debt_to_equity": 0.016955558210611343,
+      "riba_intensity": 0.01695399172604084,
+      "net_income": 0.01691821590065956,
+      "profit_margin": 0.016608279198408127,
+      "total_equity": 0.01585523970425129
+    },
+    "top_n_value": 15
+  },
+  "business_metrics": {
+    "total_cost": 16.0,
+    "cost_per_sample": 0.16,
+    "precision": 0.926829268292683,
+    "recall": 0.9743589743589743,
+    "f1": 0.9500000000000001,
+    "cost_fp": 1.0,
+    "cost_fn": 5.0
+  }
+}
