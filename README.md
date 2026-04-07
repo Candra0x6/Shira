@@ -1,4 +1,4 @@
-# 🕌 Shariah Compliance Prediction Model
+# 🕌 Shira: Shariah Compliance Prediction Model
 
 > **Real-time Islamic finance compliance screening for 605 Indonesian companies using machine learning**
 
@@ -673,8 +673,8 @@ python src/explainability.py  # Regenerate with latest data
 ## 📄 Citation
 
 ```bibtex
-@software{ShariaComplianceModel2026,
-  title={Shariah Compliance Prediction Model: Real IDX Data},
+@software{Shira2026,
+  title={Shira: Shariah Compliance Prediction Model (Real IDX Data)},
   author={Data Science Team},
   year={2026},
   institution={Indonesian Islamic Finance Project},
