@@ -31,41 +31,83 @@ class ShariaFinancialFeatures:
     # Define account name mappings (flexible matching)
     ACCOUNT_MAPPING = {
         "total_assets": ["Total_Assets", "Total Assets"],
-        "total_debt": ["Total_Debt", "Total Debt"],
-        "interest_bearing_debt": [
-            "Interest_Payable",
-            "Current_Debt",
-            "Long_Term_Debt",
-        ],  # Sum of interest-bearing obligations
-        "current_assets": ["Current_Assets", "Current Assets"],
-        "current_liabilities": ["Current_Liabilities", "Current Liabilities"],
+        "total_liabilities": [
+            "Total_Liabilities_Net_Minority_Interest",
+            "Total_Liabilities",
+            "Total_Debt",
+            "Total Liabilities",
+        ],
         "total_equity": [
             "Total_Equity_Gross_Minority_Interest",
+            "Total_Equity",
             "Stockholders_Equity",
             "Common_Stock_Equity",
         ],
+        "net_revenue": ["Total_Revenue", "Operating_Revenue", "Net_Revenue"],
+        "nonhalal_revenue_percent": ["Nonhalal_Revenue_Percent", "nonhalal_revenue_percent"],
         "net_income": [
             "Net_Income",
             "Net_Income_Common_Stockholders",
             "Net_Income_Continuous_Operations",
         ],
-        "total_revenue": ["Total_Revenue", "Operating_Revenue", "Total_Revenue"],
-        "cost_of_revenue": [
-            "Cost_Of_Revenue",
-            "Reconciled_Cost_Of_Revenue",
-            "Cost_Of_Revenue",
-        ],
-        "gross_profit": ["Gross_Profit"],
         "operating_cash_flow": [
             "Operating_Cash_Flow",
             "Cash_Flowsfromusedin_Operating_Activities_Direct",
         ],
-        "interest_income": [
-            "Interest_Income",
-            "Interest_Income_Non_Operating",
-            "Net_Interest_Income",
+        "interest_expense": [
+            "Interest_Expense",
+            "Interest_Expense_Non_Operating",
+            "Interest_Expense_Total",
         ],
     }
+
+    # Fixed sector mapping to ensure encoding consistency with training
+    SECTOR_MAPPING = {
+        "Agriculture": 0,
+        "Banking": 1,
+        "Chemicals": 2,
+        "Construction": 3,
+        "Food & Beverage": 4,
+        "Infrastructure": 5,
+        "Insurance": 6,
+        "Manufacturing": 7,
+        "Manufacturing, Electronics": 8,
+        "Manufacturing, Food & Beverage": 9,
+        "Media": 10,
+        "Mining": 11,
+        "Oil & Gas": 12,
+        "Other": 13,
+        "Pharmaceuticals": 14,
+        "Real Estate": 15,
+        "Retail": 16,
+        "Technology": 17,
+        "Telecommunications": 18,
+        "Tobacco": 19,
+        "Utilities": 20,
+    }
+
+    # Canonical feature order for model input
+    FEATURE_ORDER = [
+        "total_assets",
+        "total_liabilities",
+        "total_equity",
+        "net_revenue",
+        "nonhalal_revenue_percent",
+        "net_income",
+        "operating_cash_flow",
+        "interest_expense",
+        "debt_to_equity",
+        "debt_to_assets",
+        "roe",
+        "roa",
+        "profit_margin",
+        "interest_coverage",
+        "cash_flow_to_debt",
+        "f_riba",
+        "f_nonhalal",
+        "riba_intensity",
+        "sector_encoded",
+    ]
 
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
@@ -98,7 +140,7 @@ class ShariaFinancialFeatures:
         return None
 
     def _safe_divide(
-        self, numerator: pd.Series, denominator: pd.Series, default: float = np.nan
+        self, numerator: pd.Series, denominator: pd.Series, default: float = 0.0
     ) -> pd.Series:
         """Safely divide two series, handling zeros and NaNs."""
         result = pd.Series(default, index=numerator.index)
@@ -107,198 +149,79 @@ class ShariaFinancialFeatures:
         return result
 
     def engineer_features(self, df: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        """Engineer all 12 Shariah financial ratios."""
+        """Engineer all 19 features required by the production model."""
         if df is not None:
             self.df = df
         elif self.df is None:
             raise ValueError("No data loaded. Call load_processed_data() first.")
 
         if self.verbose:
-            logger.info("[FEATURES] Engineering 12 Shariah financial ratios...")
+            logger.info("[FEATURES] Engineering 19 features for production model...")
 
+        # Initialize result with symbol and mandatory 19 features
         result_df = self.df[["symbol"]].copy()
 
-        # Find account columns
-        accounts = {
-            "total_assets": "Total_Assets",
-            "total_debt": "Total_Debt",
-            "current_assets": "Current_Assets",
-            "current_liabilities": "Current_Liabilities",
-            "total_equity": "Total_Equity_Gross_Minority_Interest",
-            "net_income": "Net_Income",
-            "total_revenue": "Total_Revenue",
-            "cost_of_revenue": "Cost_Of_Revenue",
-            "gross_profit": "Gross_Profit",
-            "operating_cash_flow": "Operating_Cash_Flow",
-            "interest_income": "Interest_Income",
-        }
+        # 1. Base Financials (8 features)
+        for acc in self.FEATURE_ORDER[:8]:
+            col = self.find_account_column(self.df, acc)
+            if col and col in self.df.columns:
+                result_df[acc] = pd.to_numeric(self.df[col], errors="coerce").fillna(0)
+            else:
+                result_df[acc] = 0.0
 
-        # Try to find each account
-        for account_type, default_col in accounts.items():
-            col = self.find_account_column(self.df, account_type)
-            if col is None:
-                col = default_col  # Use default if found
-                if col not in self.df.columns:
-                    if self.verbose:
-                        logger.warning(
-                            f"[FEATURES] Could not find account: {account_type}"
-                        )
-                    col = None
-            self.account_cols[account_type] = col
+        # Fix specific missing indicators if they're in raw but not numeric
+        if result_df["total_liabilities"].sum() == 0:
+            logger.warning("[FEATURES] Total Liabilities is 0 - checking fallback columns...")
+            # Some datasets use Total_Debt as proxy
+            debt_col = self.find_account_column(self.df, "total_debt")
+            if debt_col and debt_col in self.df.columns:
+                result_df["total_liabilities"] = pd.to_numeric(self.df[debt_col], errors="coerce").fillna(0)
 
-        # 1. Debt-to-Assets Ratio: Total Debt / Total Assets
-        if (
-            self.account_cols["total_debt"]
-            and self.account_cols["total_assets"] in self.df.columns
-        ):
-            result_df["debt_to_assets"] = self._safe_divide(
-                self.df[self.account_cols["total_debt"]],
-                self.df[self.account_cols["total_assets"]],
-            )
+        # 2. Financial Ratios (7 features)
+        result_df["debt_to_equity"] = self._safe_divide(
+            result_df["total_liabilities"], result_df["total_equity"] + 1e-5
+        )
+        result_df["debt_to_assets"] = self._safe_divide(
+            result_df["total_liabilities"], result_df["total_assets"] + 1e-5
+        )
+        result_df["roe"] = self._safe_divide(
+            result_df["net_income"], result_df["total_equity"] + 1e-5
+        )
+        result_df["roa"] = self._safe_divide(
+            result_df["net_income"], result_df["total_assets"] + 1e-5
+        )
+        result_df["profit_margin"] = self._safe_divide(
+            result_df["net_income"], result_df["net_revenue"] + 1e-5
+        )
+        result_df["interest_coverage"] = self._safe_divide(
+            result_df["net_income"], result_df["interest_expense"] + 1e-5
+        )
+        result_df["cash_flow_to_debt"] = self._safe_divide(
+            result_df["operating_cash_flow"], result_df["total_liabilities"] + 1e-5
+        )
+
+        # 3. Shariah-Specific Indicators (3 features)
+        result_df["f_riba"] = result_df["debt_to_assets"]
+        result_df["f_nonhalal"] = result_df["nonhalal_revenue_percent"]
+        result_df["riba_intensity"] = self._safe_divide(
+            result_df["interest_expense"], result_df["net_revenue"] + 1e-5
+        )
+
+        # 4. Sector Encoding (1 feature)
+        if "sector" in self.df.columns:
+            result_df["sector"] = self.df["sector"]
         else:
-            result_df["debt_to_assets"] = np.nan
+            result_df["sector"] = "Other"
 
-        # 2. Interest-Bearing Debt Ratio: (Interest-bearing debt / Total debt)
-        # Estimate: Current_Debt + Long_Term_Debt (interest-bearing)
-        interest_bearing = self.df.get(
-            "Current_Debt", pd.Series(np.nan, index=self.df.index)
-        ) + self.df.get("Long_Term_Debt", pd.Series(np.nan, index=self.df.index))
-        if self.account_cols["total_debt"] in self.df.columns:
-            result_df["interest_bearing_debt_ratio"] = self._safe_divide(
-                interest_bearing, self.df[self.account_cols["total_debt"]]
-            )
-        else:
-            result_df["interest_bearing_debt_ratio"] = np.nan
+        result_df["sector_encoded"] = result_df["sector"].map(self.SECTOR_MAPPING).fillna(self.SECTOR_MAPPING["Other"])
 
-        # 3. Interest Income Ratio: Interest Income / Total Revenue
-        if (
-            self.account_cols["interest_income"]
-            and self.account_cols["total_revenue"] in self.df.columns
-        ):
-            result_df["interest_income_ratio"] = self._safe_divide(
-                self.df[self.account_cols["interest_income"]],
-                self.df[self.account_cols["total_revenue"]],
-            )
-        else:
-            result_df["interest_income_ratio"] = np.nan
-
-        # 4. Current Ratio: Current Assets / Current Liabilities
-        if (
-            self.account_cols["current_assets"] in self.df.columns
-            and self.account_cols["current_liabilities"] in self.df.columns
-        ):
-            result_df["current_ratio"] = self._safe_divide(
-                self.df[self.account_cols["current_assets"]],
-                self.df[self.account_cols["current_liabilities"]],
-            )
-        else:
-            result_df["current_ratio"] = np.nan
-
-        # 5. Return on Assets (ROA): Net Income / Total Assets
-        if (
-            self.account_cols["net_income"] in self.df.columns
-            and self.account_cols["total_assets"] in self.df.columns
-        ):
-            result_df["roa"] = self._safe_divide(
-                self.df[self.account_cols["net_income"]],
-                self.df[self.account_cols["total_assets"]],
-            )
-        else:
-            result_df["roa"] = np.nan
-
-        # 6. Return on Equity (ROE): Net Income / Total Equity
-        if (
-            self.account_cols["net_income"] in self.df.columns
-            and self.account_cols["total_equity"] in self.df.columns
-        ):
-            result_df["roe"] = self._safe_divide(
-                self.df[self.account_cols["net_income"]],
-                self.df[self.account_cols["total_equity"]],
-            )
-        else:
-            result_df["roe"] = np.nan
-
-        # 7. Operating Cash Flow Ratio: Operating CF / Current Liabilities
-        if (
-            self.account_cols["operating_cash_flow"] in self.df.columns
-            and self.account_cols["current_liabilities"] in self.df.columns
-        ):
-            result_df["ocf_ratio"] = self._safe_divide(
-                self.df[self.account_cols["operating_cash_flow"]],
-                self.df[self.account_cols["current_liabilities"]],
-            )
-        else:
-            result_df["ocf_ratio"] = np.nan
-
-        # 8. Asset Turnover: Total Revenue / Total Assets
-        if (
-            self.account_cols["total_revenue"] in self.df.columns
-            and self.account_cols["total_assets"] in self.df.columns
-        ):
-            result_df["asset_turnover"] = self._safe_divide(
-                self.df[self.account_cols["total_revenue"]],
-                self.df[self.account_cols["total_assets"]],
-            )
-        else:
-            result_df["asset_turnover"] = np.nan
-
-        # 9. Gross Margin: (Revenue - COGS) / Revenue
-        if (
-            self.account_cols["total_revenue"] in self.df.columns
-            and self.account_cols["cost_of_revenue"] in self.df.columns
-        ):
-            gross_profit = (
-                self.df[self.account_cols["total_revenue"]]
-                - self.df[self.account_cols["cost_of_revenue"]]
-            )
-            result_df["gross_margin"] = self._safe_divide(
-                gross_profit, self.df[self.account_cols["total_revenue"]]
-            )
-        else:
-            result_df["gross_margin"] = np.nan
-
-        # 10. Working Capital Ratio: (CA - CL) / Current Assets
-        if (
-            self.account_cols["current_assets"] in self.df.columns
-            and self.account_cols["current_liabilities"] in self.df.columns
-        ):
-            working_capital = (
-                self.df[self.account_cols["current_assets"]]
-                - self.df[self.account_cols["current_liabilities"]]
-            )
-            result_df["working_capital_ratio"] = self._safe_divide(
-                working_capital, self.df[self.account_cols["current_assets"]]
-            )
-        else:
-            result_df["working_capital_ratio"] = np.nan
-
-        # 11. Net Profit Margin: Net Income / Total Revenue
-        if (
-            self.account_cols["net_income"] in self.df.columns
-            and self.account_cols["total_revenue"] in self.df.columns
-        ):
-            result_df["net_profit_margin"] = self._safe_divide(
-                self.df[self.account_cols["net_income"]],
-                self.df[self.account_cols["total_revenue"]],
-            )
-        else:
-            result_df["net_profit_margin"] = np.nan
-
-        # 12. Equity Ratio: Total Equity / Total Assets
-        if (
-            self.account_cols["total_equity"] in self.df.columns
-            and self.account_cols["total_assets"] in self.df.columns
-        ):
-            result_df["equity_ratio"] = self._safe_divide(
-                self.df[self.account_cols["total_equity"]],
-                self.df[self.account_cols["total_assets"]],
-            )
-        else:
-            result_df["equity_ratio"] = np.nan
+        # Final order verification [symbol, sector] + 19 features
+        cols = ["symbol", "sector"] + self.FEATURE_ORDER
+        result_df = result_df[cols]
 
         if self.verbose:
             logger.info(
-                f"[FEATURES] Engineered 12 ratios for {len(result_df)} companies"
+                f"[FEATURES] Engineered 19 features for {len(result_df)} companies"
             )
             missing_pct = result_df.iloc[:, 1:].isnull().sum().mean() * 100
             logger.info(f"[FEATURES] Average missing data: {missing_pct:.1f}%")
@@ -310,7 +233,7 @@ class ShariaFinancialFeatures:
         """Save engineered features to CSV."""
         if self.features is None:
             raise ValueError("No features engineered. Call engineer_features() first.")
-        logger.info(f"[FEATURES] Saving {len(self.features)} companies with 12 ratios")
+        logger.info(f"[FEATURES] Saving {len(self.features)} companies with 19 features")
         self.features.to_csv(output_path, index=False)
         logger.info(f"[FEATURES] Saved to {output_path}")
 

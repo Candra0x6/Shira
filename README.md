@@ -210,9 +210,23 @@ python src/shariah_classifier.py
 # Train XGBoost model
 python src/xgb_trainer.py
 
-# Generate predictions with explanations
+# 5. Generate predictions with explanations
 python src/explainability.py
+
+# 6. Launch User Interface (Gradio)
+python src/gradio_app.py
 ```
+
+### 🖥️ Interactive Web Interface
+The project now includes a Gradio-based dashboard as described in the technical report. To launch:
+```bash
+python src/gradio_app.py
+```
+This UI provides:
+- **Real-time screening**: Manually input financial ratios.
+- **Hybrid analysis**: Rule-based logic + XGBoost model confidence.
+- **Evidence-based results**: Detailed breakdown of rule violations and risk factors.
+
 
 **3. Run Interactive Notebook:**
 ```bash
@@ -352,8 +366,8 @@ The model implements the following Islamic finance rules:
 ### Financial Thresholds
 | Rule | Threshold | Impact | OJK Source |
 |------|-----------|--------|-----------|
-| Debt-to-Assets | ≤ 60% | Debt limit | OJK-DSN-MUI Standards |
-| Interest-Bearing Debt | ≤ 95% | Riba monitoring | Islamic Finance Guidelines |
+| Debt-to-Assets | ≤ 45% | Debt limit | OJK-DSN-MUI (Baseline) |
+| Interest-Bearing Debt | ≤ 45% | Riba monitoring | Shariah Compliance |
 | Interest Income Ratio | ≤ 10% | Non-halal income cap | DSN-MUI Standards |
 | ROA | ≥ -10% | Profitability floor | Financial Health |
 | Equity Ratio | ≥ -20% | Solvency minimum | Leverage Control |

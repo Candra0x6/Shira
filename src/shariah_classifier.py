@@ -37,11 +37,11 @@ class ShariaComplianceClassifier:
 
     # OJK/DSN-MUI Threshold Rules
     THRESHOLDS = {
-        "debt_to_assets_max": 0.60,  # Max 60% debt (adjusted from 30% for real data)
-        "interest_income_ratio_max": 0.10,  # Max 10% interest income (adjusted from 5%)
-        "interest_bearing_debt_ratio_max": 0.95,  # Max 95% interest-bearing debt ratio (adjusted from 30%)
-        "roa_min": -0.10,  # Min -10% ROA (allow moderate losses)
-        "equity_ratio_min": -0.20,  # Min -20% equity ratio (allow some negative equity temporarily)
+        "debt_to_assets_max": 0.45,  # Max 45% debt (Source: DSN-MUI POJK Baseline)
+        "interest_income_ratio_max": 0.10,  # Max 10% non-halal (Standard MUI)
+        "interest_bearing_debt_ratio_max": 0.45,  # Max 45% interest-bearing debt (Consistent with riba cap)
+        "roa_min": -0.10,  # Min -10% ROA
+        "equity_ratio_min": -0.20,  # Min -20% equity ratio
     }
 
     def __init__(self, sector_mapping_path: str = None, verbose: bool = True):
@@ -97,51 +97,57 @@ class ShariaComplianceClassifier:
             "equity_ok": True,
         }
 
-        # Rule 1: Debt-to-Assets <= 30%
-        if pd.notna(row.get("debt_to_assets")):
-            debt_to_assets = row["debt_to_assets"]
+        # Rule 1: Debt-to-Assets <= 45%
+        debt_to_assets = row.get("debt_to_assets", row.get("f_riba"))
+        if pd.notna(debt_to_assets):
             details["debt_to_assets_ok"] = (
                 debt_to_assets <= self.THRESHOLDS["debt_to_assets_max"]
             )
-            details["debt_to_assets_value"] = debt_to_assets
+            details["debt_to_assets_value"] = float(debt_to_assets)
         else:
-            details["debt_to_assets_ok"] = np.nan
+            details["debt_to_assets_ok"] = False  # Fail if no debt data
 
-        # Rule 2: Interest Income Ratio <= 5%
-        if pd.notna(row.get("interest_income_ratio")):
-            interest_ratio = row["interest_income_ratio"]
+        # Rule 2: Interest Income Ratio <= 10%
+        interest_ratio = row.get("interest_income_ratio", row.get("f_nonhalal", row.get("nonhalal_revenue_percent")))
+        if pd.notna(interest_ratio):
             details["interest_income_ok"] = (
                 interest_ratio <= self.THRESHOLDS["interest_income_ratio_max"]
             )
-            details["interest_income_value"] = interest_ratio
+            details["interest_income_value"] = float(interest_ratio)
         else:
-            details["interest_income_ok"] = np.nan
+            details["interest_income_ok"] = False
 
-        # Rule 3: Interest-Bearing Debt Ratio <= 30%
-        if pd.notna(row.get("interest_bearing_debt_ratio")):
-            int_debt_ratio = row["interest_bearing_debt_ratio"]
+        # Rule 3: Interest-Bearing Debt Ratio <= 45% (Using f_riba as proxy)
+        int_debt_ratio = row.get("interest_bearing_debt_ratio", row.get("f_riba"))
+        if pd.notna(int_debt_ratio):
             details["interest_bearing_debt_ok"] = (
                 int_debt_ratio <= self.THRESHOLDS["interest_bearing_debt_ratio_max"]
             )
-            details["interest_bearing_debt_value"] = int_debt_ratio
+            details["interest_bearing_debt_value"] = float(int_debt_ratio)
         else:
-            details["interest_bearing_debt_ok"] = np.nan
+            details["interest_bearing_debt_ok"] = False
 
-        # Rule 4: ROA >= -1% (profitability check)
-        if pd.notna(row.get("roa")):
-            roa = row["roa"]
+        # Rule 4: ROA >= -10%
+        roa = row.get("roa")
+        if pd.isna(roa) and pd.notna(row.get("net_income")) and pd.notna(row.get("total_assets")):
+            roa = row["net_income"] / (row["total_assets"] + 1e-5)
+            
+        if pd.notna(roa):
             details["profitability_ok"] = roa >= self.THRESHOLDS["roa_min"]
-            details["roa_value"] = roa
+            details["roa_value"] = float(roa)
         else:
-            details["profitability_ok"] = np.nan
+            details["profitability_ok"] = False
 
-        # Rule 5: Equity Ratio >= 0% (positive equity requirement)
-        if pd.notna(row.get("equity_ratio")):
-            equity_ratio = row["equity_ratio"]
+        # Rule 5: Equity Ratio >= -20%
+        equity_ratio = row.get("equity_ratio")
+        if pd.isna(equity_ratio) and pd.notna(row.get("total_equity")) and pd.notna(row.get("total_assets")):
+            equity_ratio = row["total_equity"] / (row["total_assets"] + 1e-5)
+            
+        if pd.notna(equity_ratio):
             details["equity_ok"] = equity_ratio >= self.THRESHOLDS["equity_ratio_min"]
-            details["equity_ratio_value"] = equity_ratio
+            details["equity_ratio_value"] = float(equity_ratio)
         else:
-            details["equity_ok"] = np.nan
+            details["equity_ok"] = False
 
         # Overall financial compliance: all rules must be met (treat NaN as fail)
         financial_rules = [

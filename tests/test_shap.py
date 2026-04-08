@@ -41,19 +41,19 @@ class TestSHAPExplainability:
 
         # Load engineered features
         engineered_path = os.path.join(
-            os.path.dirname(__file__), "..", "data", "engineered_features.csv"
+            os.path.dirname(__file__), "..", "data", "processed", "companies_with_features.csv"
         )
         cls.features_df = pd.read_csv(engineered_path)
 
         # Use only feature columns
-        cls.X = cls.features_df.drop("company_id", axis=1, errors="ignore")
+        cls.X = cls.features_df.drop(["symbol", "sector", "company_id"], axis=1, errors="ignore")
 
         # Load predictions
         pred_path = os.path.join(
             os.path.dirname(__file__),
             "..",
             "reports",
-            "predictions_with_explanations.csv",
+            "model_predictions_explanations.csv",
         )
         cls.predictions_df = (
             pd.read_csv(pred_path) if os.path.exists(pred_path) else None
@@ -166,8 +166,8 @@ class TestSHAPExplainability:
             print("⊘ test_predictions_csv_has_content SKIPPED")
             return
 
-        assert len(self.predictions_df) == 496, (
-            f"Should have 496 predictions, got {len(self.predictions_df)}"
+        assert len(self.predictions_df) == len(self.X), (
+            f"Should have {len(self.X)} predictions, got {len(self.predictions_df)}"
         )
 
         # Check for key columns (actual column names in the data)
@@ -190,9 +190,9 @@ class TestSHAPExplainability:
             return
 
         total_predictions = len(self.predictions_df)
-        assert total_predictions == 496, f"Should have 496 total predictions"
+        assert total_predictions == len(self.X), f"Should have {len(self.X)} total predictions"
         print(
-            f"✓ test_explainability_coverage PASSED ({total_predictions}/496 predictions have SHAP)"
+            f"✓ test_explainability_coverage PASSED ({total_predictions}/{len(self.X)} predictions have SHAP)"
         )
 
     def test_shap_summary_plot_exists(self):
@@ -250,7 +250,7 @@ class TestSHAPExplainability:
             return
 
         # Check probability range (use actual column name)
-        prob_col = "prob_non_compliant"
+        prob_col = "compliance_probability"
         if prob_col not in self.predictions_df.columns:
             prob_col = "prob_compliant"
 

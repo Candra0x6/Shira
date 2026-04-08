@@ -70,7 +70,8 @@ os.chdir('$PROJECT_DIR')
 import pandas as pd
 import numpy as np
 import joblib
-from sklearn.preprocessing import StandardScaler
+import warnings
+warnings.filterwarnings('ignore')
 
 # Load features and labels
 print("\n📊 Loading data...")
@@ -85,13 +86,17 @@ model = joblib.load('models/xgb_shariah_model.pkl')
 scaler = joblib.load('models/xgb_scaler.pkl')
 print("   Model loaded successfully")
 
-# Feature columns
-feature_cols = [col for col in features_df.columns if col != 'symbol']
+# Feature columns (the first 12 features that the scaler was trained on)
+feature_cols = [
+    'total_assets', 'total_liabilities', 'total_equity', 'net_revenue',
+    'nonhalal_revenue_percent', 'net_income', 'operating_cash_flow',
+    'interest_expense', 'debt_to_equity', 'debt_to_assets', 'roe', 'roa'
+]
 
 # Get predictions for first 20 companies
 print("\n🎯 Making predictions...")
 sample_df = df.head(20).copy()
-X = sample_df[feature_cols].values
+X = sample_df[feature_cols].values.astype(float)
 X_scaled = scaler.transform(X)
 
 predictions = model.predict(X_scaled)

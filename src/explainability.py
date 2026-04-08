@@ -48,9 +48,32 @@ class ExplainabilityGenerator:
             self.scaler = pickle.load(f)
         logger.info("[EXPLAIN] Scaler loaded successfully")
 
+    # List of 19 features in the exact order required by the model
+    MODEL_FEATURES = [
+        "total_assets",
+        "total_liabilities",
+        "total_equity",
+        "net_revenue",
+        "nonhalal_revenue_percent",
+        "net_income",
+        "operating_cash_flow",
+        "interest_expense",
+        "debt_to_equity",
+        "debt_to_assets",
+        "roe",
+        "roa",
+        "profit_margin",
+        "interest_coverage",
+        "cash_flow_to_debt",
+        "f_riba",
+        "f_nonhalal",
+        "riba_intensity",
+        "sector_encoded",
+    ]
+
     def prepare_data(
         self, features_csv: str, labels_csv: str, feature_cols: list = None
-    ) -> pd.DataFrame:
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
         """Prepare data for explanations."""
         logger.info("[EXPLAIN] Preparing data for explanations...")
 
@@ -64,13 +87,18 @@ class ExplainabilityGenerator:
         # Merge
         df = df_features.merge(df_labels, on="symbol", how="left")
 
-        # Determine feature columns if not provided
+        # Use the 19 features required by the production model
         if feature_cols is None:
-            exclude_cols = {"symbol", "shariah_compliant"}
-            feature_cols = [col for col in df.columns if col not in exclude_cols]
+            feature_cols = self.MODEL_FEATURES
 
-        # Fill NaN and prepare X
-        X = df[feature_cols].fillna(df[feature_cols].median())
+        # Ensure all required features exist
+        for col in feature_cols:
+            if col not in df.columns:
+                logger.warning(f"[EXPLAIN] Missing feature column: {col}. Filling with 0.")
+                df[col] = 0.0
+
+        # Select only these features from the dataframe
+        X = df[feature_cols].fillna(0)
         X_scaled = self.scaler.transform(X)
 
         self.X_data = X_scaled
@@ -183,8 +211,8 @@ if __name__ == "__main__":
     # Get project root
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    model_path = f"{project_root}/models/xgb_shariah_model.pkl"
-    scaler_path = f"{project_root}/models/xgb_scaler.pkl"
+    model_path = f"{project_root}/models/final_trained_model.pkl"
+    scaler_path = f"{project_root}/models/feature_scaler.pkl"
     features_csv = f"{project_root}/data/processed/companies_with_features.csv"
     labels_csv = f"{project_root}/data/processed/companies_with_labels.csv"
     output_csv = f"{project_root}/reports/model_predictions_explanations.csv"

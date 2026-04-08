@@ -39,19 +39,19 @@ class TestModelPrediction:
 
         # Load engineered features
         engineered_path = os.path.join(
-            os.path.dirname(__file__), "..", "data", "engineered_features.csv"
+            os.path.dirname(__file__), "..", "data", "processed", "companies_with_features.csv"
         )
         cls.features_df = pd.read_csv(engineered_path)
 
-        # Use only feature columns (exclude company_id)
-        cls.X = cls.features_df.drop("company_id", axis=1, errors="ignore")
+        # Use only feature columns
+        cls.X = cls.features_df.drop(["symbol", "sector", "company_id"], axis=1, errors="ignore")
 
         # Load predictions for comparison
         pred_path = os.path.join(
             os.path.dirname(__file__),
             "..",
             "reports",
-            "predictions_with_explanations.csv",
+            "model_predictions_explanations.csv",
         )
         if os.path.exists(pred_path):
             cls.predictions_df = pd.read_csv(pred_path)

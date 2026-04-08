@@ -1,0 +1,105 @@
+[0;32m[SUCCESS][0m Python 3 found: Python 3.14.3
+[0;34m[INFO][0m Checking dependencies...
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mRunning Complete Shariah Compliance Pipeline[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Starting at 2026-04-07 13:27:38
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 1: Data Loading & Processing[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Loading financial data from CSV...
+[0;34m[INFO][0m Converting long format to wide format...
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+    from data_loader import load_and_process_data
+ImportError: cannot import name 'load_and_process_data' from 'data_loader' (/home/cn/projects/competition/model/src/data_loader.py)
+[0;32m[SUCCESS][0m Data loading complete
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 2: Feature Engineering[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Engineering 12 Shariah-compliant financial ratios...
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+    from shariah_features import engineer_features
+ImportError: cannot import name 'engineer_features' from 'shariah_features' (/home/cn/projects/competition/model/src/shariah_features.py)
+[0;32m[SUCCESS][0m Feature engineering complete
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 3: Shariah Compliance Classification[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Applying OJK/DSN-MUI Shariah compliance rules...
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+    df = classify_shariah_compliance('/home/cn/projects/competition/model/data/processed/companies_with_features.csv')
+TypeError: classify_shariah_compliance() missing 2 required positional arguments: 'sector_mapping_json' and 'output_csv'
+[0;32m[SUCCESS][0m Shariah classification complete
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 4: XGBoost Model Training[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Training XGBoost classifier on 12 features...
+Traceback (most recent call last):
+  File "<string>", line 8, in <module>
+    metrics = train_xgboost_model('/home/cn/projects/competition/model/data/processed/companies_with_labels.csv')
+TypeError: train_xgboost_model() missing 2 required positional arguments: 'model_output_path' and 'scaler_output_path'
+[0;32m[SUCCESS][0m Model training complete
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 5: Generate Predictions & Explanations[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Generating predictions for all companies...
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+    from explainability import generate_predictions_with_explanations
+ImportError: cannot import name 'generate_predictions_with_explanations' from 'explainability' (/home/cn/projects/competition/model/src/explainability.py)
+[0;32m[SUCCESS][0m Predictions complete
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mStage 6: Generate Technical Documentation[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;34m[INFO][0m Generating comprehensive technical reports...
+
+======================================================================
+                    🔄 Generating Technical Reports                    
+======================================================================
+
+📄 Generating technical report...
+✅ Technical report saved to: /home/cn/projects/competition/model/reports/TECHNICAL_REPORT.md
+📄 Generating JSON technical report...
+✅ JSON report saved to: /home/cn/projects/competition/model/reports/technical_report.json
+
+======================================================================
+              ✅ Technical Reports Generated Successfully              
+======================================================================
+
+📁 Generated Files:
+  1. /home/cn/projects/competition/model/reports/TECHNICAL_REPORT.md
+  2. /home/cn/projects/competition/model/reports/technical_report.json
+
+💡 Next Steps:
+  • Review TECHNICAL_REPORT.md for detailed analysis
+  • Use technical_report.json for programmatic access
+  • Share reports with stakeholders
+[0;32m[SUCCESS][0m Technical reports generated
+[0;32m[SUCCESS][0m Reports saved to reports/ directory
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mPipeline Complete![0m
+[0;36m════════════════════════════════════════════════════════════[0m
+
+[0;32m[SUCCESS][0m All stages finished successfully
+
+[0;36m════════════════════════════════════════════════════════════[0m
+[0;36mPrediction Results Summary[0m
+[0;36m════════════════════════════════════════════════════════════[0m
+

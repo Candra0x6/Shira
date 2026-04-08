@@ -1,0 +1,268 @@
+{
+  "report_metadata": {
+    "generated_at": "2026-04-07 13:27:42",
+    "model_version": "1.0.0",
+    "report_type": "Technical Documentation"
+  },
+  "model_summary": {
+    "name": "Shariah Compliance Classification Model",
+    "type": "XGBoost Classifier",
+    "framework": "XGBoost",
+    "version": "1.0.0",
+    "training_date": "2026-04-07T03:03:44.086851",
+    "model_file": "models/xgb_shariah_model.pkl",
+    "model_size_kb": 100,
+    "architecture": {
+      "input_features": 12,
+      "output_classes": 2,
+      "output_type": "Binary Classification",
+      "hyperparameters": {
+        "n_estimators": 150,
+        "max_depth": 6,
+        "learning_rate": 0.01,
+        "min_child_weight": 1,
+        "gamma": 0.3,
+        "subsample": 0.9,
+        "colsample_bytree": 0.6,
+        "reg_lambda": 0.1,
+        "reg_alpha": 1.0,
+        "scale_pos_weight": 0.2849740932642487
+      },
+      "n_estimators": 100,
+      "max_depth": 5,
+      "learning_rate": 0.1
+    },
+    "training_data": {
+      "total_samples": 496,
+      "features": 14,
+      "train_samples": 396,
+      "test_samples": 100,
+      "class_weight": 0.2849740932642487
+    },
+    "performance_metrics": {
+      "train_accuracy": "94.95%",
+      "test_accuracy": "92.00%",
+      "test_precision": "92.68%",
+      "test_recall": "97.44%",
+      "test_f1": "95.00%",
+      "test_auc": "92.83%",
+      "matthews_corr": "0.7565",
+      "kappa": "0.7506"
+    },
+    "confusion_matrix": {
+      "true_positives": 76,
+      "true_negatives": 16,
+      "false_positives": 6,
+      "false_negatives": 2,
+      "sensitivity": 0.9743589743589743,
+      "specificity": 0.7272727272727273
+    },
+    "features_used": [
+      "total_assets",
+      "total_liabilities",
+      "total_equity",
+      "net_revenue",
+      "nonhalal_revenue_percent",
+      "net_income",
+      "operating_cash_flow",
+      "interest_expense",
+      "debt_to_equity",
+      "debt_to_assets",
+      "roe",
+      "roa"
+    ]
+  },
+  "prediction_statistics": {
+    "total_predictions": 495,
+    "compliant_count": 0.0,
+    "compliant_percent": "0.00%",
+    "non_compliant_count": 0.0,
+    "non_compliant_percent": "0.00%",
+    "confidence_statistics": {
+      "mean": "0.6173",
+      "median": "0.6215",
+      "std_dev": "0.0249",
+      "min": "0.5648",
+      "max": "0.6677",
+      "25th_percentile": "0.5972",
+      "75th_percentile": "0.6398"
+    },
+    "confidence_distribution": {
+      "50-60%": 149,
+      "60-70%": 346,
+      "70-80%": 0,
+      "80-90%": 0,
+      "90-100%": 0
+    }
+  },
+  "feature_importance": {
+    "total_features": 12,
+    "top_features": [
+      {
+        "feature": "total_liabilities",
+        "importance": "0.5445",
+        "importance_percent": "54.45%"
+      },
+      {
+        "feature": "nonhalal_revenue_percent",
+        "importance": "0.0760",
+        "importance_percent": "7.60%"
+      },
+      {
+        "feature": "roe",
+        "importance": "0.0562",
+        "importance_percent": "5.62%"
+      },
+      {
+        "feature": "debt_to_equity",
+        "importance": "0.0462",
+        "importance_percent": "4.62%"
+      },
+      {
+        "feature": "net_revenue",
+        "importance": "0.0432",
+        "importance_percent": "4.32%"
+      }
+    ],
+    "all_features": [
+      {
+        "feature": "total_liabilities",
+        "importance": "0.5445",
+        "importance_percent": "54.45%"
+      },
+      {
+        "feature": "nonhalal_revenue_percent",
+        "importance": "0.0760",
+        "importance_percent": "7.60%"
+      },
+      {
+        "feature": "roe",
+        "importance": "0.0562",
+        "importance_percent": "5.62%"
+      },
+      {
+        "feature": "debt_to_equity",
+        "importance": "0.0462",
+        "importance_percent": "4.62%"
+      },
+      {
+        "feature": "net_revenue",
+        "importance": "0.0432",
+        "importance_percent": "4.32%"
+      },
+      {
+        "feature": "roa",
+        "importance": "0.0427",
+        "importance_percent": "4.27%"
+      },
+      {
+        "feature": "debt_to_assets",
+        "importance": "0.0396",
+        "importance_percent": "3.96%"
+      },
+      {
+        "feature": "net_income",
+        "importance": "0.0389",
+        "importance_percent": "3.89%"
+      },
+      {
+        "feature": "total_assets",
+        "importance": "0.0385",
+        "importance_percent": "3.85%"
+      },
+      {
+        "feature": "total_equity",
+        "importance": "0.0379",
+        "importance_percent": "3.79%"
+      },
+      {
+        "feature": "interest_expense",
+        "importance": "0.0362",
+        "importance_percent": "3.62%"
+      },
+      {
+        "feature": "operating_cash_flow",
+        "importance": "0.0000",
+        "importance_percent": "0.00%"
+      }
+    ]
+  },
+  "data_pipeline": {
+    "raw_data": {
+      "file": "data/raw/combined_financial_data_idx.csv",
+      "rows": 89243,
+      "columns": 7,
+      "size_mb": 6.97035026550293,
+      "unique_companies": 604,
+      "time_period": "2020-2023"
+    },
+    "processed_data": {
+      "file": "data/processed/companies_with_features.csv",
+      "rows": 495,
+      "columns": 21,
+      "size_mb": 0.13253021240234375
+    },
+    "labeled_data": {
+      "file": "data/processed/companies_with_labels.csv",
+      "rows": 495,
+      "columns": 15,
+      "size_mb": 0.06282234191894531
+    },
+    "transformation_steps": [
+      "1. Load raw financial data (89K+ rows)",
+      "2. Pivot from long to wide format",
+      "3. Engineer financial ratios (debt-to-assets, ROE, ROA, etc.)",
+      "4. Apply Shariah compliance rules",
+      "5. Encode categorical features",
+      "6. Scale features with StandardScaler",
+      "7. Train XGBoost classifier",
+      "8. Generate predictions and explanations"
+    ]
+  },
+  "recommendations": {
+    "recommendations": [
+      {
+        "category": "Performance",
+        "status": "\u2705 EXCELLENT",
+        "message": "Test accuracy of 92.00% indicates excellent model performance",
+        "action": "Ready for production deployment"
+      },
+      {
+        "category": "Confidence",
+        "status": "\u2705 HIGH",
+        "message": "High AUC score (92.83%) indicates strong discrimination ability",
+        "action": "Predictions are highly reliable"
+      },
+      {
+        "category": "Data Balance",
+        "status": "\u26a0\ufe0f  IMBALANCED",
+        "message": "Class distribution is skewed (0.00%)",
+        "action": "Monitor for potential bias in predictions"
+      },
+      {
+        "category": "Deployment",
+        "status": "\ud83d\udccb",
+        "message": "Model requires 12 input features with proper scaling",
+        "action": "Ensure data pipeline matches training configuration"
+      },
+      {
+        "category": "Monitoring",
+        "status": "\ud83d\udccb",
+        "message": "Track prediction distribution in production",
+        "action": "Alert if class distribution changes significantly"
+      },
+      {
+        "category": "Updates",
+        "status": "\ud83d\udccb",
+        "message": "Model trained on data from 2020-2023",
+        "action": "Retrain annually or when new data is available"
+      },
+      {
+        "category": "Features",
+        "status": "\ud83d\udccb",
+        "message": "Total liabilities is the most important feature (54.45%)",
+        "action": "Ensure this feature is accurate in production data"
+      }
+    ]
+  }
+}

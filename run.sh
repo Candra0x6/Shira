@@ -222,6 +222,22 @@ print(f'Output: reports/model_predictions_explanations.csv')
     fi
 }
 
+run_technical_report() {
+    print_header "Stage 6: Generate Technical Documentation"
+    log_info "Generating comprehensive technical reports..."
+    
+    python3 "$SRC_DIR/generate_technical_report.py" "$PROJECT_DIR" 2>&1 | tee -a "$LOG_FILE"
+    
+    if [ $? -eq 0 ]; then
+        log_success "Technical reports generated"
+        if [ -f "$REPORTS_DIR/TECHNICAL_REPORT.md" ]; then
+            log_success "Reports saved to reports/ directory"
+        fi
+    else
+        log_warning "Technical report generation had issues (see above)"
+    fi
+}
+
 run_complete_pipeline() {
     print_header "Running Complete Shariah Compliance Pipeline"
     log_info "Starting at $(date '+%Y-%m-%d %H:%M:%S')"
@@ -231,6 +247,7 @@ run_complete_pipeline() {
     run_shariah_classification
     run_model_training
     run_predictions
+    run_technical_report
     
     print_header "Pipeline Complete!"
     log_success "All stages finished successfully"

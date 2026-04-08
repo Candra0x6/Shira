@@ -180,14 +180,14 @@ class ShariaRulesEngine:
 
     # Hard thresholds (automatic fail if exceeded)
     HARD_THRESHOLDS = {
-        "debt_to_assets": 0.33,  # F_RIBA: Debt cannot exceed 33% of assets
-        "nonhalal_income": 0.25,  # F_NONHALAL: Max 25% non-halal income
+        "debt_to_assets": 0.45,  # F_RIBA: Debt cannot exceed 45% of assets (Baseline OJK)
+        "nonhalal_income": 0.10,  # F_NONHALAL: Max 10% non-halal income (Standard DSN-MUI)
     }
 
     # Edge case thresholds (ML takes over)
     EDGE_CASE_THRESHOLDS = {
-        "debt_to_assets": (0.30, 0.35),  # 30-35% = gray zone
-        "nonhalal_income": (0.20, 0.25),  # 20-25% = gray zone
+        "debt_to_assets": (0.40, 0.48),  # 40-48% = gray zone
+        "nonhalal_income": (0.07, 0.13),  # 7-13% = gray zone
     }
 
     def __init__(self):
